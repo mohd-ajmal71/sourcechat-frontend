@@ -1,4 +1,5 @@
 import streamlit as st
+import uuid
 
 from screens.home import show as home_page
 from screens.pdf import show as pdf_page
@@ -16,15 +17,16 @@ st.set_page_config(
 
 
 # Hide default Streamlit sidebar
+
 st.markdown(
     """
     <style>
     [data-testid="stSidebar"] {
-        display:none;
+        display: none;
     }
 
     [data-testid="collapsedControl"] {
-        display:none;
+        display: none;
     }
     </style>
     """,
@@ -32,7 +34,14 @@ st.markdown(
 )
 
 
+# Create a unique session ID for this browser session
+
+if "session_id" not in st.session_state:
+    st.session_state.session_id = str(uuid.uuid4())
+
+
 # First page when app starts
+
 if "page" not in st.session_state:
     st.session_state.page = "home"
 
@@ -43,26 +52,21 @@ if st.session_state.page == "home":
 
     home_page()
 
-
 elif st.session_state.page == "pdf":
 
     pdf_page()
-
 
 elif st.session_state.page == "youtube":
 
     youtube_page()
 
-
 elif st.session_state.page == "website":
 
     website_page()
 
-
 elif st.session_state.page == "settings":
 
     settings_page()
-
 
 elif st.session_state.page == "about":
 
