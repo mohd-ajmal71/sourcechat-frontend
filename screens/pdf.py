@@ -1,8 +1,7 @@
 import streamlit as st
 import requests
-import uuid
 
-API_URL = "https://sourcechat-ajmal.onrender.com"
+API_URL = "http://127.0.0.1:8000"
 
 
 def show():
@@ -15,31 +14,33 @@ def show():
     if "uploaded" not in st.session_state:
         st.session_state.uploaded = False
 
-    if "document_id" not in st.session_state:
-        st.session_state.document_id = None
+    if "documents" not in st.session_state:
+        st.session_state.documents = []
 
-    if "session_id" not in st.session_state:
-        st.session_state.session_id = str(uuid.uuid4())
-
-    uploaded_file = st.file_uploader(
+    uploaded_files = st.file_uploader(
         "Upload PDF",
-        type=["pdf"]
+        type=["pdf"],
+        accept_multiple_files=True
     )
 
-    if uploaded_file:
+    if uploaded_files:
 
         if st.button("Upload PDF"):
 
-            files = [
-                (
-                    "files",
+            files = []
+
+            for uploaded_file in uploaded_files:
+
+                files.append(
                     (
-                        uploaded_file.name,
-                        uploaded_file.getvalue(),
-                        "application/pdf",
-                    ),
+                        "files",
+                        (
+                            uploaded_file.name,
+                            uploaded_file.getvalue(),
+                            "application/pdf",
+                        ),
+                    )
                 )
-            ]
 
             with st.spinner("Processing PDF..."):
 
@@ -57,15 +58,13 @@ def show():
 
                         data = response.json()
 
-                        st.session_state.document_id = data[
-                            "document_id"
-                        ]
+                        st.session_state.documents = data["document_ids"]
 
                         st.session_state.uploaded = True
                         st.session_state.messages = []
 
                         st.success(
-                            "PDF uploaded successfully."
+                            "PDFs uploaded successfully."
                         )
 
                     else:
@@ -96,31 +95,20 @@ def show():
 
                     st.markdown("**📚 Sources**")
 
-                    seen = set()
-
                     for source in sources:
 
-                        key = (
-                            source["source"],
-                            source["page"]
+                        st.markdown(
+                            f"- **{source['source']}** "
+                            f"(Page {source['page']})"
                         )
-
-                        if key not in seen:
-
-                            seen.add(key)
-
-                            st.markdown(
-                                f"- **{source['source']}** "
-                                f"(Page {source['page']})"
-                            )
 
     if (
         st.session_state.uploaded
-        and st.session_state.document_id
+        and st.session_state.documents
     ):
 
         question = st.chat_input(
-            "Ask a question about your PDF..."
+            "Ask a question about your PDFs..."
         )
 
         if question:
@@ -146,7 +134,7 @@ def show():
                             json={
                                 "question": question,
                                 "session_id": st.session_state.session_id,
-                                "document_id": st.session_state.document_id,
+                                "document_ids": st.session_state.documents,
                             }
                         )
 
@@ -163,23 +151,12 @@ def show():
 
                                 st.markdown("**📚 Sources**")
 
-                                seen = set()
-
                                 for source in sources:
 
-                                    key = (
-                                        source["source"],
-                                        source["page"]
+                                    st.markdown(
+                                        f"- **{source['source']}** "
+                                        f"(Page {source['page']})"
                                     )
-
-                                    if key not in seen:
-
-                                        seen.add(key)
-
-                                        st.markdown(
-                                            f"- **{source['source']}** "
-                                            f"(Page {source['page']})"
-                                        )
 
                             st.session_state.messages.append(
                                 {
@@ -204,5 +181,5 @@ def show():
     else:
 
         st.info(
-            "Upload a PDF to start chatting."
+            "Upload PDFs to start chatting."
         )
