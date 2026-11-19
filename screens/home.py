@@ -1,9 +1,9 @@
 
 import streamlit as st
+from pathlib import Path
 
 
 def show():
-
     st.markdown("""
     <style>
 
@@ -21,8 +21,6 @@ def show():
         padding-top: 3.5rem;
         padding-bottom: 2rem;
     }
-
-    /* Heading */
 
     .hero-label {
         text-align: center;
@@ -60,10 +58,11 @@ def show():
         margin-bottom: 12px;
     }
 
-    /* Reserved space for future hero image */
+    /* Hero image spacing */
 
-    .hero-image-space {
-        height: 35px;
+    .hero-image-container {
+        margin-top: 15px;
+        margin-bottom: 35px;
     }
 
     /* Feature cards */
@@ -166,9 +165,26 @@ def show():
     <div class="hero-subtitle">
         Intelligent Document Question Answering & Copyright Risk Verification
     </div>
-
-    <div class="hero-image-space"></div>
     """, unsafe_allow_html=True)
+
+    # Hero image
+
+    image_path = Path(__file__).resolve().parent.parent / "assets" / "home_hero.jpeg"
+
+    if image_path.exists():
+        image_col1, image_col2, image_col3 = st.columns([1, 4, 1])
+
+        with image_col2:
+            st.image(
+                str(image_path),
+                use_container_width=True
+            )
+    else:
+        st.warning("Hero image not found. Please add home_hero.png inside the assets folder.")
+
+    st.markdown('<div class="hero-image-container"></div>', unsafe_allow_html=True)
+
+    # Feature cards
 
     col1, col2 = st.columns(2, gap="large")
 
